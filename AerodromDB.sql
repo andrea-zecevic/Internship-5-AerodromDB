@@ -42,7 +42,8 @@ CREATE TABLE Tickets (
 	TicketId SERIAL PRIMARY KEY,
 	FlightId INT REFERENCES Flights(FlightId),
 	UserId INT REFERENCES Users(UserId),
-	SeatNumber VARCHAR(5) NOT NULL
+	SeatNumber VARCHAR(10) NOT NULL,
+	Price FLOAT
 )
 
 CREATE TABLE Seats (
@@ -61,6 +62,8 @@ CREATE TABLE Crew (
 	Surname VARCHAR(30),
 	Role ROLE NOT NULL,
 	Birth DATE,
+	NumberOfFlights INT NOT NULL,
+	Salary FLOAT,
 	FlightId INT REFERENCES Flights(FlightId)	
 )
 
@@ -74,6 +77,27 @@ CREATE TABLE Ratings (
 	Anonymous BOOLEAN
 )
 
---Trigers and constraints
+--Constraints
+
+ALTER TABLE Tickets
+ADD CONSTRAINT CheckTicketPrice
+CHECK (Price > 0)
+
+ALTER TABLE Crew
+ADD CONSTRAINT CheckNumberOfFlights
+CHECK (NumberOfFlights >= 0)
+
+ALTER TABLE Airplanes
+ADD CONSTRAINT CheckManufactureYear
+CHECK (YearOfManufacture <= EXTRACT(YEAR FROM CURRENT_DATE))
+
+ALTER TABLE Users
+ADD CONSTRAINT CheckBirthYear
+CHECK (Birth < CURRENT_DATE)
+
+ALTER TABLE Users
+ADD CONSTRAINT UniqueEmail
+UNIQUE (Email)
+
 
 
