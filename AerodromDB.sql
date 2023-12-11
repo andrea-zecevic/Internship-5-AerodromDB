@@ -1,19 +1,20 @@
 CREATE TABLE Airports(
 	AirportId SERIAL PRIMARY KEY,
-	Name VARCHAR(30) NOT NULL,
-	City VARCHAR(30) NOT NULL,
-	RunwayCapacity INT,
-	StoreCapacity INT	
+	Name VARCHAR(255) NOT NULL,
+	City VARCHAR(255) NOT NULL,
+	RunwayCapacity INT NOT NULL,
+	StoreCapacity INT NOT NULL
 )
+
+CREATE TYPE STATUS AS ENUM ('On sale' , 'Active', 'For repair', 'Disassembled')
 
 CREATE TABLE Airplanes (
 	AirplaneId SERIAL PRIMARY KEY,
-	Name VARCHAR(10) NOT NULL,
-	Model VARCHAR(10),
-	Capacity INT,
-	YearOfManufacture INT,
+	CompanyName VARCHAR(50) NOT NULL,
+	Model VARCHAR(20),
+	Capacity INT NOT NULL,
+	YearOfManufacture INT NOT NULL,
 	Status VARCHAR(50),
-	Location POINT,
 	AirportId INT REFERENCES Airports(AirportId)
 )
 
@@ -22,18 +23,18 @@ CREATE TABLE Flights (
 	FlightCapacity INT NOT NULL,
 	AirplaneId INT REFERENCES Airplanes(AirplaneId),
 	DepartureAirportId INT REFERENCES Airports(AirportId),
-    DestinationAirportId INT REFERENCES Airports(AirportId),
-    DepartureTime TIME,
-	ArrivalTime TIME,
+	DestinationAirportId INT REFERENCES Airports(AirportId),
+	DepartureTime TIME NOT NULL,
+	ArrivalTime TIME NOT NULL,
 	Price DECIMAL
 )
 
 CREATE TABLE Users (
 	UserId SERIAL PRIMARY KEY,
-	Name VARCHAR(30),
-	Surname VARCHAR(30),
+	Name VARCHAR(50) NOT NULL,
+	Surname VARCHAR(50) NOT NULL,
 	Email VARCHAR(100),
-	Birth DATE,
+	Birth DATE NOT NULL,
 	LoyaltyCardExpiy DATE
 )
 
@@ -41,34 +42,26 @@ CREATE TABLE Tickets (
 	TicketId SERIAL PRIMARY KEY,
 	FlightId INT REFERENCES Flights(FlightId),
 	UserId INT REFERENCES Users(UserId),
-	SeatNumber VARCHAR(5) UNIQUE
+	SeatNumber VARCHAR(5) NOT NULL
 )
 
 CREATE TABLE Seats (
-    SeatId SERIAL PRIMARY KEY,
-    FlightId INT REFERENCES Flights(FlightId),
-    SeatNumber VARCHAR(5) UNIQUE,
-    Section VARCHAR(10),
+	SeatId SERIAL PRIMARY KEY,
+	FlightId INT REFERENCES Flights(FlightId),
+	Section VARCHAR(10) NOT NULL,
 	Occupied BOOLEAN DEFAULT FALSE,
-    OccupiedBy INT REFERENCES Users(UserId)
+	OccupiedBy INT REFERENCES Users(UserId)
 )
 
-CREATE TABLE Pilots (
-	PilotId SERIAL PRIMARY KEY,
-	Name VARCHAR(30),
-	Surname VARCHAR(30),
-	Birth DATE,
-	CONSTRAINT CheckPilotAge CHECK (DATE_PART('year', CURRENT_DATE) - DATE_PART('year', Birth) BETWEEN 20 AND 60)
-)
+CREATE TYPE ROLE AS ENUM ('Pilot' , 'Cabin Crew')
 
 CREATE TABLE Crew (
 	CrewId SERIAL PRIMARY KEY,
 	Name VARCHAR(30),
 	Surname VARCHAR(30),
-	Role VARCHAR(30),
-	FlightId INT REFERENCES Flights(FlightId),
-	CONSTRAINT UniqueCrewMember UNIQUE (FlightId, Role),
-	CHECK (Role IN ('Pilot', 'CabinCrew'))
+	Role ROLE NOT NULL,
+	Birth DATE,
+	FlightId INT REFERENCES Flights(FlightId)	
 )
 
 CREATE TABLE Ratings (
@@ -77,18 +70,10 @@ CREATE TABLE Ratings (
 	FlightId INT REFERENCES Flights(FlightId),
 	Rating INT CHECK (Rating BETWEEN 1 AND 5),
 	Comment TEXT,
-	CreationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	CreationDate DATE,
 	Anonymous BOOLEAN
 )
 
-ALTER TABLE Flights
-ADD CONSTRAINT CheckTicketPrice
-CHECK (Price >= 0)
-
-ALTER TABLE Seats
-ADD CONSTRAINT CheckSeatSection
-CHECK (Section IN ('Business', 'Economy'))
-
-
+--Trigers and constraints
 
 
